@@ -1,8 +1,15 @@
 #![no_std]
+#[cfg(feature="shared_i2c")]
+extern crate alloc;
+
 use bit_field::BitField;
 use embedded_hal::blocking::i2c::{Write, WriteRead};
 use num_enum::IntoPrimitive;
 use paste::paste;
+#[cfg(feature="shared_i2c")]
+use alloc::rc::Rc;
+#[cfg(feature="shared_i2c")]
+use core::cell::RefCell;
 
 /// Pin modes.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -176,9 +183,12 @@ impl Map for Mcp23008 {
 
 /// MCP23017/MCP23008, a 16/8-Bit I2C I/O Expander with I2C Interface.
 /// Provide the chip variant (its register map) via `MAP`.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct Mcp230xx<I2C, MAP> {
+    #[cfg(not(feature="shared_i2c"))]
     i2c: I2C,
+    #[cfg(feature="shared_i2c")]
+    i2c: Rc<RefCell<I2C>>,
     address: u8,
     map: core::marker::PhantomData<MAP>,
 }
@@ -216,14 +226,34 @@ where
     const DEFAULT_ADDRESS: u8 = 0x20;
 
     /// Creates an expander with the default configuration.
+    #[cfg(not(feature="shared_i2c"))]
     pub fn new_default(i2c: I2C) -> Result<Self, Error<E>> {
         Self::new(i2c, Self::DEFAULT_ADDRESS)
     }
 
     /// Creates an expander with specific address.
+    #[cfg(not(feature="shared_i2c"))]
     pub fn new(i2c: I2C, address: u8) -> Result<Self, Error<E>> {
         Ok(Self {
             i2c,
+            address,
+            map: core::marker::PhantomData,
+        })
+    }
+
+    /// Creates an expander with the default configuration.
+    /// This variant uses a shared I2C bus.
+    #[cfg(feature="shared_i2c")]
+    pub fn new_default(i2c: &Rc<RefCell<I2C>>) -> Result<Self, Error<E>> {
+        Self::new(i2c, Self::DEFAULT_ADDRESS)
+    }
+
+    /// Creates an expander with specific address.
+    /// This variant uses a shared I2C bus.
+    #[cfg(feature="shared_i2c")]
+    pub fn new(i2c: &Rc<RefCell<I2C>>, address: u8) -> Result<Self, Error<E>> {
+        Ok(Self {
+            i2c: i2c.clone(),
             address,
             map: core::marker::PhantomData,
         })
@@ -237,13 +267,23 @@ where
     /// Read an 8 bit register
     pub fn read(&mut self, addr: u8) -> Result<u8, E> {
         let mut data = [0u8];
+        #[cfg(not(feature="shared_i2c"))]
         self.i2c.write_read(self.address, &[addr], &mut data)?;
+        #[cfg(feature="shared_i2c")]
+        self.i2c.borrow_mut().write_read(self.address, &[addr], &mut data)?;
         Ok(data[0])
     }
 
     /// Write an 8 bit register
     pub fn write(&mut self, addr: u8, data: u8) -> Result<(), E> {
-        self.i2c.write(self.address, &[addr, data])
+        #[cfg(not(feature="shared_i2c"))]
+        {
+            self.i2c.write(self.address, &[addr, data])
+        }
+        #[cfg(feature="shared_i2c")]
+        {
+            self.i2c.borrow_mut().write(self.address, &[addr, data])
+        }
     }
 
     /// Get a single bit in a register
