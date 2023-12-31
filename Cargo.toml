@@ -1,8 +1,8 @@
 [package]
 name = "mcp230xx"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP23008/MCP23017 8/16-Bit I2C I/O Expander with I2C Interface"
-authors = ["Luca Zulian <lucagiuggia@gmail.com>", "Robert Jördens <rj@quartiq.de>", "Norman Krackow <nk@quartiq.de>"]
+authors = ["Luca Zulian <lucagiuggia@gmail.com>", "Robert Jördens <rj@quartiq.de>", "Norman Krackow <nk@quartiq.de>", "Michael Kamprath <michael@kamprath.net>"]
 categories = ["embedded", "hardware-support", "no-std"]
 keywords = ["hal", "IO", "mcp23017", "mcp23008", "I2C"]
 license = "MIT"
