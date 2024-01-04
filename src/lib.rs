@@ -264,26 +264,30 @@ where
         self.address
     }
 
+    #[cfg(not(feature="shared_i2c"))]
+    /// Internal function to get a mutable reference to the I2C bus
+    fn i2c(&mut self) -> &mut I2C {
+        &mut self.i2c
+    }
+
+    #[cfg(feature="shared_i2c")]
+    /// Internal function to get a mutable reference to the I2C bus
+    fn i2c(&mut self) -> core::cell::RefMut<'_, I2C> {
+        self.i2c.borrow_mut()
+    }
+
     /// Read an 8 bit register
     pub fn read(&mut self, addr: u8) -> Result<u8, E> {
         let mut data = [0u8];
-        #[cfg(not(feature="shared_i2c"))]
-        self.i2c.write_read(self.address, &[addr], &mut data)?;
-        #[cfg(feature="shared_i2c")]
-        self.i2c.borrow_mut().write_read(self.address, &[addr], &mut data)?;
+        let address = self.address;
+        self.i2c().write_read(address, &[addr], &mut data)?;
         Ok(data[0])
     }
 
     /// Write an 8 bit register
     pub fn write(&mut self, addr: u8, data: u8) -> Result<(), E> {
-        #[cfg(not(feature="shared_i2c"))]
-        {
-            self.i2c.write(self.address, &[addr, data])
-        }
-        #[cfg(feature="shared_i2c")]
-        {
-            self.i2c.borrow_mut().write(self.address, &[addr, data])
-        }
+        let address = self.address;
+        self.i2c().write(address, &[addr, data])
     }
 
     /// Get a single bit in a register
