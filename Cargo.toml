@@ -20,6 +20,10 @@ test = false
 bench = false
 
 [features]
+# Configure the library to use a reference counted I2C bus object rather than moving the I2C bus
+# object into the MCP230xx struct. This allows the I2C bus to be shared between multiple clients. Using this
+# feature does change the API slightly, as the I2C bus object must be passed wrapped in an `&Rc<RefCell<...>>` to the
+# `new` function.
 shared_i2c = []
 
 [dependencies]

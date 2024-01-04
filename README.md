@@ -34,6 +34,34 @@ assert!(u.gpio(pin).unwrap());
 
 ![Address table](docs/address-pins.jpg)
 
+### Shared I2C bus
+This library supports sharing the I2C bus with other devices. To do so, you must specify the `shared_i2c` feature in your `Cargo.toml`:
+
+```toml
+[dependencies.mcp230xx]
+version = "0.2"
+features = ["shared_i2c"]
+```
+Furthermore, you must pass the I2C bus object wrapped in an `RC<RefCell<...>>` container to the `Mcp230xx` `new` function, and if your project is an `no_std` project then to be able to
+create and `Rc<>` your project must have a global allocator and the `alloc` crate as a dependency, such as [`embedded-alloc`](https://github.com/rust-embedded/embedded-alloc).
+
+```rust
+extern crate alloc;
+
+use mcp230xx::*;
+
+// Include mcp230xx create with shared_i2c feature and declare and init your
+// global allocator at the start of program.
+
+let mut i2c = I2c::new(...);  // create your I2C bus object as per your particular HAL
+let i2c = Rc::new(RefCell::new(i2c));  // wrap it in an Rc<RefCell<...>> container
+
+let mut u = Mcp230xx<I2C, Mcp23017>::new_default(&i2c).unwrap();
+u.set_direction(pin, Direction::Output).unwrap();
+u.set_gpio(pin, Level::High).unwrap();
+assert!(u.gpio(pin).unwrap());
+```
+
 ## Documentation
 
 API Docs available on [docs.rs](https://docs.rs/mcp230xx)
