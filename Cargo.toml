@@ -15,7 +15,7 @@ exclude = [
 ]
 
 [dependencies]
-embedded-hal = "0.2.3"
+embedded-hal = "1.0.0"
 bit_field = "0.10.1"
 num_enum = { version = "0.5.7", default-features = false }
 paste = "1.0.8"
