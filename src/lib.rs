@@ -1,6 +1,6 @@
 #![no_std]
 use bit_field::BitField;
-use embedded_hal::blocking::i2c::{Write, WriteRead};
+use embedded_hal::i2c::I2c;
 use num_enum::IntoPrimitive;
 use paste::paste;
 
@@ -210,7 +210,7 @@ macro_rules! bit_getter_setter {
 ///
 impl<I2C, E, MAP> Mcp230xx<I2C, MAP>
 where
-    I2C: WriteRead<Error = E> + Write<Error = E>,
+    I2C: I2c<Error = E>,
     MAP: Map,
 {
     const DEFAULT_ADDRESS: u8 = 0x20;
