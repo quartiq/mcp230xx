@@ -1,7 +1,7 @@
 #![no_std]
 use bit_field::BitField;
 use embedded_hal::blocking::i2c::{Write, WriteRead};
-use num_enum::IntoPrimitive;
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 use paste::paste;
 
 /// Pin modes.
@@ -118,7 +118,7 @@ pub enum Register {
 ///
 /// See [the datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf) for more
 /// information on the device.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, IntoPrimitive, Default)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, IntoPrimitive, TryFromPrimitive, Default)]
 #[repr(usize)]
 pub enum Mcp23017 {
     #[default]
@@ -154,7 +154,7 @@ impl Map for Mcp23017 {
 /// MCP23008 Register mapping
 /// See [the datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf) for more
 /// information on the device.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, IntoPrimitive, Default)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, IntoPrimitive, TryFromPrimitive, Default)]
 #[repr(usize)]
 pub enum Mcp23008 {
     #[default]
